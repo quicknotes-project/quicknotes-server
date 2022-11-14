@@ -38,4 +38,4 @@ jobs:
           remote_port: ${{ env.port }}
           remote_user: pi
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          rsh: "cd ~/minimal-openresty-server; ./reload.sh"
+          rsh: "'cd ~/minimal-openresty-server; ./reload.sh'"
