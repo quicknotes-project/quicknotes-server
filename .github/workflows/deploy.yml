@@ -13,6 +13,7 @@ jobs:
     env:
       token: ${{ secrets.LINKS_TOKEN }}
       key: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
     steps:
       - name: Fetch deploy target location
@@ -28,21 +29,13 @@ jobs:
           echo "port=$port" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
-
-#       - name: Configure SSH
-#         shell: bash
-#         run: |
-#           source agent-start ${{ GITHUB_ACTION }}
-#           echo ${{ secrets.SSH_PRIVATE_KEY }} | agent-add
-
+        
       - name: Deploy
         run: |
-          mkdir -p ~/.ssh
-          echo $key > ~/.ssh/id_rsa
-          sed -i -e "s#\\\\n#\n#g" ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo $key | tr -d '\r' | DISPLAY=None ssh-add - >/dev/null          
           SWITCHES="-avz --delete --exclude \".*\""
-          RSH="ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ env.port }}"
+          RSH="ssh -o StrictHostKeyChecking=no -p ${{ env.port }}"
           rsync $SWITCHES -e "$RSH" * ${{ env.host }}:/home/pi/minimal-openresty-server.copy/
 
 #       - name: Deploy
