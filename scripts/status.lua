@@ -23,6 +23,6 @@ end
 local uptime = os.capture("uptime")
 local temp = os.capture("cat /sys/class/thermal/thermal_zone0/temp") / 1000
 
-local status = string.format('%s,  CPU temp: %s\'', uptime, temp)
+local status = string.format('%s,  CPU temp: %s\'C', uptime, temp)
 
 ngx.say(status)
