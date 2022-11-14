@@ -36,8 +36,10 @@ jobs:
 
       - name: Deploy
         run: |
+          echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           SWITCHES="-avz --delete --exclude \".*\""
-          RSH="ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no -p ${{ env.port }}"
+          RSH="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -p ${{ env.port }}"
           rsync $SWITCHES -e "$RSH" * ${{ env.host }}:/home/pi/minimal-openresty-server.copy/
 
 #       - name: Deploy
