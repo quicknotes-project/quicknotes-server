@@ -28,16 +28,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure SSH
-        shell: sh
-        run: |
-          source agent-start "$GITHUB_ACTION"
-          echo ${{ secrets.SSH_PRIVATE_KEY }} | agent-add          
+#       - name: Configure SSH
+#         shell: bash
+#         run: |
+#           source agent-start ${{ GITHUB_ACTION }}
+#           echo ${{ secrets.SSH_PRIVATE_KEY }} | agent-add
 
       - name: Deploy
         run: |
           SWITCHES="-avz --delete --exclude \".*\""
-          RSH="ssh -o StrictHostKeyChecking=no -p ${{ env.port }}"
+          RSH="ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no -p ${{ env.port }}"
           rsync $SWITCHES -e "$RSH" * ${{ env.host }}:/home/pi/minimal-openresty-server.copy/
 
 #       - name: Deploy
