@@ -38,5 +38,5 @@ jobs:
         run: |
           SWITCHES="-avz --delete --exclude \".*\""
           RSH="ssh -o StrictHostKeyChecking=no -p ${{ env.port }}"
-          rsync $SWITCHES -e "$RSH" * pi@${{ env.host }}:/home/pi/minimal-openresty-server.copy/
+          rsync $SWITCHES -e "$RSH" * pi@${{ env.host }}:~/minimal-openresty-server/
           ssh pi@${{ env.host }} -p ${{ env.port }} "cd ~/minimal-openresty-server; ./reload.sh"
