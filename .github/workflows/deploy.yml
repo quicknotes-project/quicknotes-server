@@ -39,15 +39,4 @@ jobs:
           SWITCHES="-avz --delete --exclude \".*\""
           RSH="ssh -o StrictHostKeyChecking=no -p ${{ env.port }}"
           rsync $SWITCHES -e "$RSH" * pi@${{ env.host }}:/home/pi/minimal-openresty-server.copy/
-
-#       - name: Deploy
-#         uses: Burnett01/rsync-deployments@5.2.1
-#         with:
-#           switches: -avz --delete --exclude ".*"
-#           path: "*"
-#           remote_path: /home/pi/minimal-openresty-server.copy/
-#           remote_host: ${{ env.host }}
-#           remote_port: ${{ env.port }}
-#           remote_user: pi
-#           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-#           rsh: cd ~/minimal-openresty-server; ./reload.sh
+          ssh pi@${{ env.host }} -p ${{ env.port }} "cd ~/minimal-openresty-server; ./reload.sh"
