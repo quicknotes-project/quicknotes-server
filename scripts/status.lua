@@ -20,7 +20,8 @@ function os.capture(cmd, raw)
     return output
 end
 
-local uptime = os.capture("uptime")
+-- local uptime = os.capture("uptime")
+local uptime = io.popen("uptime"):read("a"):match("^%s*(.-)%s*$")
 local temp = os.capture("cat /sys/class/thermal/thermal_zone0/temp") / 1000
 
 local status = string.format('%s,  CPU temp: %s\'C', uptime, temp)
