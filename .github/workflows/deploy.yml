@@ -29,6 +29,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configure SSH
+        shell: sh
         run: |
           source agent-start "$GITHUB_ACTION"
           echo ${{ secrets.SSH_PRIVATE_KEY }} | agent-add          
