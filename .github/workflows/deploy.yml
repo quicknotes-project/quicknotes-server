@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       token: ${{ secrets.LINKS_TOKEN }}
+      key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
       - name: Fetch deploy target location
@@ -37,7 +38,7 @@ jobs:
       - name: Deploy
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo $key > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           SWITCHES="-avz --delete --exclude \".*\""
           RSH="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -p ${{ env.port }}"
