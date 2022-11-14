@@ -39,6 +39,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo $key > ~/.ssh/id_rsa
+          sed -i -e "s#\\\\n#\n#g" ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           SWITCHES="-avz --delete --exclude \".*\""
           RSH="ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ env.port }}"
