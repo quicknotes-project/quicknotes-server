@@ -32,8 +32,8 @@ jobs:
         
       - name: Deploy
         run: |
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          echo $key | tr -d '\r' | DISPLAY=None ssh-add - >/dev/null          
+          ssh-agent -a $SSH_AUTH_SOCK
+          echo $key | ssh-add
           SWITCHES="-avz --delete --exclude \".*\""
           RSH="ssh -o StrictHostKeyChecking=no -p ${{ env.port }}"
           rsync $SWITCHES -e "$RSH" * ${{ env.host }}:/home/pi/minimal-openresty-server.copy/
