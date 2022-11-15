@@ -18,7 +18,7 @@ then
     ngx.exit(ngx.HTTP_BAD_REQUEST)    
 end
 
-local db = sqlite3.open("data/db.sqlite3")
+local db = sqlite3.open("./data/db.sqlite3")
 
 local err = db:exec(
     string.format(

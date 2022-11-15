@@ -48,7 +48,7 @@ local function handleGET(db)
 end
 
 if ngx.req.get_method() == "GET" then
-    local db = sqlite3.open("data/db.sqlite3")
+    local db = sqlite3.open("./data/db.sqlite3")
     local status = handleGET(db)
     db:close()
     ngx.exit(status)
