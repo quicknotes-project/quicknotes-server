@@ -1,5 +1,5 @@
 local cjson = require "cjson"
-local sqlite3 = require "lsqlite3complete"
+local sqlite3 = require "./lsqlite3complete"
 
 local headers = ngx.req.get_headers()
 local cookies = headers["Cookie"]
@@ -10,7 +10,7 @@ local sid = cookies.match(cookies, "session_id%s*=%s*(%d+)")
 
 if not sid then ngx.exit(ngx.HTTP_UNAUTHORIZED) end
 
-local db = sqlite3.open("data/db.sqlite3")
+local db = sqlite3.open("./data/db.sqlite3")
 
 local response = {}
 local err = db:exec(

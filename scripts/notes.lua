@@ -1,9 +1,7 @@
--- ngx.say("handling " .. debug.getinfo(1).source:match(".*/(.*)%.lua"))
-
-local sqlite3 = require "lsqlite3complete"
 local cjson   = require "cjson"
+local sqlite3 = require "./lsqlite3complete"
 
-local us = require "scripts/useful_stuff"
+local us = require "./scripts/useful_stuff"
 
 local function handleGET(db)
     local uid = us.getUserId(ngx.req.get_headers(), db)

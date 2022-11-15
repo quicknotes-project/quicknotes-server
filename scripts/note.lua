@@ -1,10 +1,8 @@
--- ngx.say("handling " .. debug.getinfo(1).source:match(".*/(.*)%.lua"))
-
 local cjson = require "cjson"
-local sqlite3 = require "lsqlite3complete"
+local sqlite3 = require "./lsqlite3complete"
 -- local validate = require "scripts/validate"
 
-local us = require "scripts/useful_stuff"
+local us = require "./scripts/useful_stuff"
 
 local function handlePOST(db)
     local uid = us.getUserId(ngx.req.get_headers(), db)
@@ -89,7 +87,7 @@ end
 
 local method = ngx.req.get_method()
 local status = ngx.HTTP_METHOD_NOT_IMPLEMENTED
-local db = sqlite3.open("data/db.sqlite3")
+local db = sqlite3.open("./data/db.sqlite3")
 
 if method == "POST" then
     status = handlePOST(db)

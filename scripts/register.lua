@@ -1,6 +1,7 @@
 local cjson = require "cjson"
-local sqlite3 = require "lsqlite3complete"
-local validate = require "scripts/validate"
+local sqlite3 = require "./lsqlite3complete"
+
+local validate = require "./scripts/validate"
 
 ngx.req.read_body()
 local dataJSON = ngx.req.get_body_data()
