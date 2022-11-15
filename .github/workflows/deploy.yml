@@ -31,6 +31,11 @@ jobs:
           echo "host=$host" >> $GITHUB_ENV
           echo "port=$port" >> $GITHUB_ENV
 
+      - name: Change relative paths to absolute
+        run: |
+          sed -i 's/require ".\//require "\/home\/pi\/quicknotes-server\//g' ./scripts/*.lua
+          sed -i 's/open(".\//open("\/home\/pi\/quicknotes-server\//g' ./scripts/*.lua
+
       - name: Deploy
         env:
           switches: -avz --delete --exclude ".*"
