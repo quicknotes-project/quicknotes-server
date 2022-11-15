@@ -42,4 +42,4 @@ jobs:
         run: |
           rsh="ssh -o StrictHostKeyChecking=no -p $remote_port"
           rsync $switches -e "$rsh" $path $remote_user@$remote_host:$remote_path
-          ssh $remote_user@$remote_host -o StrictHostKeyChecking=no -p $remote_port "cd $remote_path; ./reload.sh"
+          ssh $remote_user@$remote_host -o StrictHostKeyChecking=no -p $remote_port "sudo systemctl restart quicknotes.service"
