@@ -1,5 +1,5 @@
-local cjson   = require "cjson"
-local sqlite3 = require "./lsqlite3complete"
+local cjson = require "cjson"
+local sqlite3 = require "lsqlite3complete"
 
 local us = require "./scripts/useful_stuff"
 
