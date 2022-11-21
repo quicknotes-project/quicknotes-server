@@ -14,16 +14,20 @@ local function handlePOST(db)
     local dataTable = cjson.decode(dataJSON)
     if not dataTable then return ngx.HTTP_BAD_REQUEST end
 
-    local nid = nil
-    db:exec(
-        string.format(
-          [[INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Content,Title)
-                VALUES("%s",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,"%s","%s");
-            SELECT last_insert_rowid();]],
-            uid, dataTable.content, dataTable.title
-        ),
-        function (_,_,values) nid = values[1] return 0 end
+    local stmt = db:prepare(
+        [[INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Content,Title)
+            VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?);
+        SELECT last_insert_rowid();]]
     )
+    stmt:bind_values(uid, dataTable.content, dataTable.title)
+    local res = stmt:step()
+    -- while res ~= sqlite3.DONE or res ~= sqlite3.ERROR or res ~= sqlite3.MISUSE do
+    --     res = stmt:step()
+    -- end
+    if res == sqlite3.ERROR then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+    local nid = stmt:last_insert_rowid()
+    stmt:finalize()
+
     if not nid then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     ngx.say(nid)
