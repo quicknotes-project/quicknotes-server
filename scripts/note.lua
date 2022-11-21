@@ -11,16 +11,16 @@ local function handlePOST(db)
     local dataJSON = ngx.req.get_body_data()
     if not dataJSON then return ngx.HTTP_BAD_REQUEST end
 
-    -- local dataTable = cjson.decode(dataJSON)
-    -- if not dataTable then return ngx.HTTP_BAD_REQUEST end
+    local dataTable = cjson.decode(dataJSON)
+    if not dataTable then return ngx.HTTP_BAD_REQUEST end
 
     local nid = nil
     db:exec(
         string.format(
-          [[INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Content)
-                VALUES("%s",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,"%s");
+          [[INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Content,Title)
+                VALUES("%s",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,"%s","%s");
             SELECT last_insert_rowid();]],
-            uid, dataJSON
+            uid, dataTable.content, dataTable.title
         ),
         function (_,_,values) nid = values[1] return 0 end
     )
