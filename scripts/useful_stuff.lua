@@ -6,20 +6,33 @@ function M.getSessionId(headers)
     return cookies.match(cookies, "session_id%s*=%s*(%d+)")
 end
 
+function M.sexec(db, sql, ...)
+    local stmt = db:prepare(sql)
+    local err = stmt:bind_values(...)
+    if err ~= sqlite3.OK then return err end
+    stmt:step()
+    return stmt:finalize()
+end
+
+function M.srows(db, sql, ...)
+    local stmt = db:prepare(sql)
+    local err = stmt:bind_values(...)
+    if err ~= sqlite3.OK then return nil, err end
+    local function rows() return stmt:rows()(stmt) end
+    return rows, sqlite3.OK
+end
+
 function M.sidToUid(db, sid)
-    local uid = nil
-    db:exec(
-        string.format(
-        [[SELECT u.UserID FROM Sessions as s
-                JOIN Users as u ON s.UserID = u.UserID
-                WHERE s.SessionID = %s AND
-                    julianday('now', 'localtime') - julianday(s.CreatedAt) < 30
-                LIMIT 1;]],
-            sid
-        ),
-        function (_,_,values) uid = values[1] return 0 end
-    )
-    return uid
+    local sql = [[
+        SELECT u.UserID FROM Sessions as s
+            JOIN Users as u ON s.UserID = u.UserID
+            WHERE s.SessionID = ? AND
+                julianday('now', 'localtime') - julianday(s.CreatedAt) < 30]]
+    local rows = M.srows(db, sql, sid)
+    if not rows then return nil end
+    local row = rows()
+    if not row then return nil end
+    return row[1]
 end
 
 function M.getUserId(headers, db)
