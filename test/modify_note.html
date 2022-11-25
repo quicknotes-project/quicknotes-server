@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes</title>
+</head>
+
+<body>
+  <h1>Modify Note</h1>
+  <form id="form">
+    <legend>Note ID</legend>
+    <input type="text" name="noteID" id="noteID">
+    <legend>New Title</legend>
+    <input type="text" name="title" id="title">
+    <legend>New Content</legend>
+    <input type="text" name="content" id="content">
+    <br><br>
+    <input type="submit" value="go">
+  </form>
+
+  <span id="response"></span>
+
+  <script>
+    const apiRoute = "/api/note?noteID="
+    const form = document.getElementById("form")
+    const noteID = document.getElementById("noteID")
+    const title = document.getElementById("title")
+    const content = document.getElementById("content")
+    const response = document.getElementById("response")
+
+    state = {
+      noteID: "",
+      title: "",
+      content: ""
+    }
+    
+    noteID.addEventListener("change", (e) => {
+      state.noteID = e.target.value
+    })
+    title.addEventListener("change", (e) => {
+      state.title = e.target.value
+    })
+    content.addEventListener("change", (e) => {
+      state.content = e.target.value
+    })
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault()
+      const body = JSON.stringify(state)
+      const res = await fetch(apiRoute.concat(state.noteID), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body,
+      })
+      if (res.status != 200) {
+        response.innerText = res.statusText + " (" + res.status + ")"
+        return
+      }
+      const data = await res.text()
+      response.innerText = "Success\n".concat(data)
+    })
+  </script>
+</body>
+
+</html>
