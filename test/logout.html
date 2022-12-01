@@ -24,15 +24,15 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault()
       fetch(apiRoute, {
-      method: "GET"
+        method: "GET"
       }).then(res => {
-      if (res.status != 200) {
+        if (res.status != 200) {
           response.innerText = res.statusText + " (" + res.status + ")"
           return
-      }
-      res.text().then(
+        }
+        res.text().then(
           text => response.innerText = "Success\n".concat(text)
-      )
+        )
       })
     })
   </script>
