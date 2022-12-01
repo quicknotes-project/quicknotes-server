@@ -11,51 +11,27 @@
 <body>
   <h1>Create Note</h1>
   <form id="form">
-    <legend>Title</legend>
-    <input type="text" name="title" id="title">
-    <legend>Content</legend>
-    <input type="text" name="content" id="content">
-    <br><br>
     <input type="submit" value="go">
   </form>
   <span id="response"></span>
 
   <script>
     const apiRoute = "/api/note"
-    const form = document.getElementById("form")
-    const title = document.getElementById("title")
-    const content = document.getElementById("content")
     const response = document.getElementById("response")
-
-    const state = {
-      title: "",
-      content: ""
-    }
-
-    title.addEventListener("change", (e) => {
-      state.title = e.target.value
-    })
-    content.addEventListener("change", (e) => {
-      state.content = e.target.value
-    })
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault()
-      const body = JSON.stringify(state)
-      // const body = state.content
-      const res = await fetch(apiRoute, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body
+      fetch(apiRoute, {
+        method: "POST"
+      }).then(res => {
+        if (res.status != 200) {
+          response.innerText = res.statusText + " (" + res.status + ")"
+          return
+        }
+        res.text().then(
+          text => response.innerText = "Success\n".concat(text)
+        )
       })
-      if (res.status != 200) {
-        response.innerText = res.statusText + " (" + res.status + ")"
-        return
-      }
-      const data = await res.text()
-      response.innerText = "Success\n".concat(data)
     })
   </script>
 </body>

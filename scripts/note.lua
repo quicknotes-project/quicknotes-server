@@ -7,23 +7,35 @@ local function handlePOST(db)
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
-    ngx.req.read_body()
-    local dataJSON = ngx.req.get_body_data()
-    if not dataJSON then return ngx.HTTP_BAD_REQUEST end
-
-    local dataTable = cjson.decode(dataJSON)
-    if not dataTable then return ngx.HTTP_BAD_REQUEST end
-
     local sql = [[
-        INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Content,Title)
-            VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?)]]
-    local err = us.sexec(db, sql, uid, dataTable.content, dataTable.title)
+        INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Title, Content)
+            VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Note ' || CURRENT_TIMESTAMP,'')]]
+    local err = us.sexec(db, sql, uid)
     if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local nid = db:last_insert_rowid()
     if not nid then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
-    ngx.say(nid)
+    local sql = [[
+        SELECT NoteID, Title, CreatedAt, ModifiedAt, Content
+            FROM Notes
+            WHERE NoteID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, nid, uid)
+    if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+
+    local row = rows()
+    if not row then return ngx.HTTP_UNAUTHORIZED end
+
+    local note = {
+        noteID     = row[1],
+        title      = row[2],
+        createdAt  = row[3],
+        modifiedAt = row[4],
+        content    = row[5]
+    }
+
+    ngx.say(cjson.encode(note))
+
     return ngx.HTTP_OK
 end
 
