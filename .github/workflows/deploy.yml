@@ -3,8 +3,14 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
 
 jobs:
   deploy:
@@ -14,12 +20,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-    
+
       - name: Configure SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    
+
       - name: Fetch deploy target location
         env:
           token: ${{ secrets.NGROK_API_TOKEN }}
@@ -30,6 +36,7 @@ jobs:
           port=${url##*:}
           echo "host=$host" >> $GITHUB_ENV
           echo "port=$port" >> $GITHUB_ENV
+          rm tunnels.json
 
       - name: Change relative paths to absolute
         run: |
