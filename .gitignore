@@ -1,1 +1,13 @@
-.vscode/
+# Ignore everything
+*
+# But descend into directories
+!*/
+
+!/.github/**
+!/docs/**
+!/scripts/**
+!/test/**
+
+!/conf/nginx.conf
+!README.md
+!.gitignore 
