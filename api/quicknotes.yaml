@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Quicknotes - OpenAPI 3.0
+  version: 0.0.1
+servers:
+  - url: https://quicknotes-project.github.io
+tags:
+  - name: user
+  - name: note
+  - name: tag
+paths:
+  /register:
+    post:
+      tags:
+        - user
+      requestBody:
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Successful operation
+        '409':
+          description: Username conflict
+  /login:
+    post:
+      tags:
+        - user
+      responses:
+        '200':
+          description: Successful operation
+  /user:
+    get:
+      tags:
+        - user
+      responses:
+        '200':
+          description: Successful operation
+    put:
+      tags:
+        - user
+      responses:
+        '200':
+          description: Successful operation
+  /notes:
+    get:
+      tags:
+        - note
+      description: Get metadata of all user's notes
+      responses:
+        '200':
+          description: Successful operation
+  /note:
+    get:
+      tags:
+        - note
+      description: Get note's data by ID
+      responses:
+        '200':
+          description: Successful operation
+    post:
+      tags:
+        - note
+      description: Create a new note
+      responses:
+        '200':
+          description: Successful operation
+    put:
+      tags:
+        - note
+      description: Update an existing note by ID
+      responses:
+        '200':
+          description: Successful operation
+    delete:
+      tags:
+        - note
+      description: Delete a note by ID
+      responses:
+        '200':
+          description: Successful operation
+  /tag:
+    get:
+      tags:
+        - tag
+      responses:
+        '200':
+          description: Successful operation
+    post:
+      tags:
+        - tag
+      responses:
+        '200':
+          description: Successful operation
+    put:
+      tags:
+        - tag
+      responses:
+        '200':
+          description: Successful operation
+    delete:
+      tags:
+        - tag
+      responses:
+        '200':
+          description: Successful operation
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: ivan2001
+        fullname:
+          type: string
+          example: Ivan
+        password:
+          type: string
+          format: password
+          example: qwerty123
+    NoteMeta:
+      type: object
+      properties:
+        tag:
+          $ref: '#/components/schemas/Tag'
+        noteID:
+          type: integer
+          example: 12
+        title:
+          type: string
+          example: "'wa' and 'ga' suffixes usage"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2019-09-07 15:50:00
+        modifiedAt:
+          type: string
+          format: date-time
+          example: 2019-10-15 20:02:00
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+    Note:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/NoteMeta'
+        content:
+          type: string
+          example: "God only knows"
+    Tag:
+      type: object
+      properties:
+        tagID:
+          type: integer
+          example: 137
+        title:
+          type: string
+          example: japanese
