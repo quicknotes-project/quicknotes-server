@@ -4,153 +4,313 @@ info:
   version: 0.0.1
 servers:
   - url: https://quicknotes-project.github.io
+    description: redirect to ngrok tunnel (listens on /api!)
 tags:
   - name: user
+    description: Authentication & user data
   - name: note
+    description: Operations with authenticated user's notes
   - name: tag
+    description: Operations with authenticated user's tags
 paths:
   /register:
     post:
+      security: []
       tags:
         - user
+      summary: Register a new user
       requestBody:
+        required: true
         content:
-          application/json: 
+          application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
-        '200':
-          description: Successful operation
-        '409':
-          description: Username conflict
+        "200":
+          description: Successfully registered a new user.
+        "400":
+          description: Client failed to provide valid data in body.
+        "409":
+          description: Username conflict.
+        "500":
+          description: Internal server error.
   /login:
     post:
+      security: []
+      tags:
+        - user
+      summary: Log in with user credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+      responses:
+        "200":
+          description: Successfully logged in
+          headers:
+            Set-Cookie:
+              description: Cookie with session ID
+              schema:
+                type: string
+                example: session_id=123; max-age=2592000
+        "400":
+          description: Client failed to provide valid data in body.
+        "401":
+          description: Invalid credentials provided in body.
+        "500":
+          description: Internal server error.
+  /logout:
+    post:
+      summary: Log out
       tags:
         - user
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successfully logged out.
+          headers:
+            Set-Cookie:
+              description: Cookie unsetting session ID
+              schema:
+                type: string
+                example: session_id=unset; max-age=0
+        "401":
+          description: Client was not logged in.
+        "500":
+          description: Internal server error.
+
   /user:
     get:
+      summary: Get user data
       tags:
         - user
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNames"
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
     put:
+      summary: Update user data and/or credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
       tags:
         - user
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successfully updated.
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
   /notes:
     get:
       tags:
         - note
-      description: Get metadata of all user's notes
+      summary: Get metadata of all user's notes
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NoteMeta"
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
   /note:
     get:
       tags:
         - note
-      description: Get note's data by ID
+      summary: Get note's data by ID
+      parameters:
+        - in: query
+          name: noteID
+          schema:
+            type: integer
+          required: true
+          description: Note's ID
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
     post:
       tags:
         - note
-      description: Create a new note
+      summary: Create a new note
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+              examples:
+                NewNote:
+                  $ref: "#/components/examples/NewNote"
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
     put:
       tags:
         - note
-      description: Update an existing note by ID
+      summary: Update an existing note by ID
+      parameters:
+        - in: query
+          name: noteID
+          schema:
+            type: integer
+          required: true
+          description: Note's ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteMeta"
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+        "400":
+          description: Client failed to provide required parameters.
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
     delete:
       tags:
         - note
-      description: Delete a note by ID
+      summary: Delete a note by ID
+      parameters:
+        - in: query
+          name: noteID
+          schema:
+            type: integer
+          required: true
+          description: Note's ID
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: Successful operation.
+        "400":
+          description: Client failed to set valid noteID query parameter.
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
   /tag:
     get:
       tags:
         - tag
       responses:
-        '200':
+        "200":
           description: Successful operation
     post:
       tags:
         - tag
       responses:
-        '200':
+        "200":
           description: Successful operation
     put:
       tags:
         - tag
       responses:
-        '200':
+        "200":
           description: Successful operation
     delete:
       tags:
         - tag
       responses:
-        '200':
+        "200":
           description: Successful operation
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
   schemas:
-    User:
+    UserBase:
       type: object
       properties:
         username:
           type: string
-          example: ivan2001
-        fullname:
-          type: string
-          example: Ivan
-        password:
-          type: string
-          format: password
-          example: qwerty123
+          example: john_doe
+    UserNames:
+      allOf:
+        - $ref: "#/components/schemas/UserBase"
+        - type: object
+          properties:
+            fullname:
+              type: string
+              example: John Doe
+    UserCredentials:
+      allOf:
+        - $ref: "#/components/schemas/UserBase"
+        - type: object
+          properties:
+            password:
+              type: string
+              format: password
+              example: qwerty123
+    User:
+      allOf:
+        - $ref: "#/components/schemas/UserCredentials"
+        - $ref: "#/components/schemas/UserNames"
     NoteMeta:
       type: object
       properties:
-        tag:
-          $ref: '#/components/schemas/Tag'
         noteID:
           type: integer
-          example: 12
-        title:
-          type: string
-          example: "'wa' and 'ga' suffixes usage"
+          readOnly: true
+          example: 123
         createdAt:
           type: string
           format: date-time
+          readOnly: true
           example: 2019-09-07 15:50:00
         modifiedAt:
           type: string
           format: date-time
+          readOnly: true
           example: 2019-10-15 20:02:00
+        title:
+          type: string
+          example: "'wa' and 'ga' suffixes usage"
         tags:
           type: array
           items:
-            $ref: '#/components/schemas/Tag'
-    Note:
+            $ref: "#/components/schemas/Tag"
+    NoteContent:
       type: object
       properties:
-        meta:
-          $ref: '#/components/schemas/NoteMeta'
         content:
           type: string
           example: "God only knows"
+    Note:
+      allOf:
+        - $ref: "#/components/schemas/NoteMeta"
+        - $ref: "#/components/schemas/NoteContent"
     Tag:
       type: object
       properties:
@@ -160,3 +320,15 @@ components:
         title:
           type: string
           example: japanese
+  examples:
+    NewNote:
+      summary: A newly created note
+      value:
+        noteID: 123
+        title: "Note 2022-12-01 10:24:48"
+        createdAt: 2022-12-01 10:24:48
+        modifiedAt: 2022-12-01 10:24:48
+        tags: []
+        content: ""
+security:
+  - cookieAuth: []
