@@ -38,6 +38,13 @@ jobs:
           echo "port=$port" >> $GITHUB_ENV
           rm tunnels.json
 
+      - name: Exclude irrelevant files from deployment
+        run: |
+          find . -type d -name "\.[^\.]*" -prune -exec rm -rf {} \;
+          find . -type d -name "docs" -prune -exec rm -rf {} \;
+          find . -type f -name "\.*" -delete
+          find . -type f -iname "*.md" -delete
+
       - name: Change relative paths to absolute
         run: |
           sed -i 's/require ".\//require "\/home\/pi\/quicknotes-server\//g' ./scripts/*.lua
@@ -45,7 +52,7 @@ jobs:
 
       - name: Deploy
         env:
-          switches: -avz --delete --exclude ".*"
+          switches: -avz --delete
           path: "*"
           remote_user: pi
           remote_host: ${{ env.host }}
