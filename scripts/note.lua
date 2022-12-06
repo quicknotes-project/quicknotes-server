@@ -111,7 +111,28 @@ local function handlePUT(db)
 end
 
 local function handleDELETE(db)
-    return ngx.HTTP_METHOD_NOT_IMPLEMENTED
+    local nid = tonumber(ngx.req.get_uri_args().noteID)
+    if not nid then return ngx.HTTP_BAD_REQUEST end
+
+    local uid = us.getUserId(ngx.req.get_headers(), db)
+    if not uid then return ngx.HTTP_UNAUTHORIZED end
+
+    local sql = [[
+        SELECT NoteID
+            FROM Notes
+            WHERE NoteID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, nid, uid)
+    if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+
+    if not rows() then return ngx.HTTP_UNAUTHORIZED end
+
+    local sql = [[
+        DELETE FROM Notes
+            WHERE NoteID = ? AND UserID = ?]]
+    local err = us.sexec(db, sql, nid, uid)
+    if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+
+    return ngx.HTTP_OK
 end
 
 local handlers = {
