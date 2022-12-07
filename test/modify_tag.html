@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes</title>
+</head>
+
+<body>
+  <h1>Modify Tag</h1>
+  <form id="form">
+    <legend>Tag ID</legend>
+    <input type="text" name="tagID" id="tagID">
+    <legend>New Title</legend>
+    <input type="text" name="title" id="title">
+    <br><br>
+    <input type="submit" value="go">
+  </form>
+
+  <span id="response"></span>
+
+  <script>
+    const apiRoute = "/api/tag?tagID="
+    const form = document.getElementById("form")
+    const tagID = document.getElementById("tagID")
+    const title = document.getElementById("title")
+    const response = document.getElementById("response")
+
+    state = {
+      tagID: "",
+      title: ""
+    }
+    
+    tagID.addEventListener("change", (e) => {
+      state.tagID = e.target.value
+    })
+    title.addEventListener("change", (e) => {
+      state.title = e.target.value
+    })
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault()
+      const body = JSON.stringify(state)
+      const res = await fetch(apiRoute.concat(state.tagID), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body,
+      })
+      if (res.status != 200) {
+        response.innerText = res.statusText + " (" + res.status + ")"
+        return
+      }
+      const data = await res.text()
+      response.innerText = "Success\n".concat(data)
+    })
+  </script>
+</body>
+
+</html>
