@@ -8,6 +8,7 @@ end
 
 function M.sexec(db, sql, ...)
     local stmt = db:prepare(sql)
+    if not stmt then return sqlite3.ERROR end;
     local err = stmt:bind_values(...)
     if err ~= sqlite3.OK then return err end
     stmt:step()
@@ -16,6 +17,7 @@ end
 
 function M.srows(db, sql, ...)
     local stmt = db:prepare(sql)
+    if not stmt then return nil, sqlite3.ERROR end;
     local err = stmt:bind_values(...)
     if err ~= sqlite3.OK then return nil, err end
     local function rows() return stmt:rows()(stmt) end

@@ -396,6 +396,9 @@ components:
         tagID:
           type: integer
           example: 137
+        userID:
+          type: integer
+          example: 69
         title:
           type: string
           example: japanese

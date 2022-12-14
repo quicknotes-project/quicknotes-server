@@ -8,69 +8,63 @@ local function handlePOST(db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
     local sql = [[
-        INSERT INTO Notes(UserID,CreatedAt,ModifiedAt,Title, Content)
-            VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'Note ' || CURRENT_TIMESTAMP,'')]]
+        INSERT INTO Tags(UserID,Title)
+            VALUES(?,'Tag ' || CURRENT_TIMESTAMP)]]
     local err = us.sexec(db, sql, uid)
     if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
-    local nid = db:last_insert_rowid()
-    if not nid then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+    local tid = db:last_insert_rowid()
+    if not tid then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local sql = [[
-        SELECT NoteID, Title, CreatedAt, ModifiedAt, Content
-            FROM Notes
-            WHERE NoteID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, nid, uid)
+        SELECT TagID, Title
+            FROM Tags
+            WHERE TagID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, tid, uid)
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local row = rows()
     if not row then return ngx.HTTP_UNAUTHORIZED end
 
-    local note = {
-        noteID     = row[1],
-        title      = row[2],
-        createdAt  = row[3],
-        modifiedAt = row[4],
-        content    = row[5]
+    local tag = {
+        tagID = row[1],
+        title = row[2]
     }
 
-    ngx.say(cjson.encode(note))
+    ngx.say(cjson.encode(tag))
 
     return ngx.HTTP_OK
 end
 
 local function handleGET(db)
-    local nid = tonumber(ngx.req.get_uri_args().noteID)
-    if not nid then return ngx.HTTP_BAD_REQUEST end
+    local tid = tonumber(ngx.req.get_uri_args().tagID)
+    if not tid then return ngx.HTTP_BAD_REQUEST end
 
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
     local sql = [[
-        SELECT NoteID, Title, CreatedAt, ModifiedAt, Content
-            FROM Notes
-            WHERE NoteID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, nid, uid)
+        SELECT TagID, Title
+            FROM Tags
+            WHERE TagID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, tid, uid)
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local row = rows()
     if not row then return ngx.HTTP_UNAUTHORIZED end
 
-    local note = {
-        noteID     = row[1],
-        title      = row[2],
-        createdAt  = row[3],
-        modifiedAt = row[4],
-        content    = row[5]
+    local tag = {
+        tagID = row[1],
+        title = row[2],
     }
 
-    ngx.say(cjson.encode(note))
+    ngx.say(cjson.encode(tag))
     return ngx.HTTP_OK
 end
 
 local function handlePUT(db)
-    local nid = tonumber(ngx.req.get_uri_args().noteID)
-    if not nid then return ngx.HTTP_BAD_REQUEST end
+    local tid = tonumber(ngx.req.get_uri_args().tagID)
+    if not tid then return ngx.HTTP_BAD_REQUEST end
 
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
@@ -83,53 +77,51 @@ local function handlePUT(db)
     if not dataTable then return ngx.HTTP_BAD_REQUEST end
 
     local sql = [[
-        SELECT Title, Content
-            FROM Notes
-            WHERE NoteID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, nid, uid)
+        SELECT Title
+            FROM Tags
+            WHERE TagID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, tid, uid)
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local row = rows()
     if not row then return ngx.HTTP_UNAUTHORIZED end
 
-    local note = {
-        title   = row[1],
-        content = row[2]
+    local tag = {
+        title = row[1]
     }
 
-    note.title   = dataTable.title   or note.title
-    note.content = dataTable.content or note.content
+    tag.title = dataTable.title or tag.title
 
     local sql = [[
-        UPDATE Notes
-        SET Title = ?, Content = ?, ModifiedAt = CURRENT_TIMESTAMP
-        WHERE NoteID = ?]]
-    local err = us.sexec(db, sql, note.title, note.content, nid)
-    if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+        UPDATE Tags
+            SET Title = ?
+            WHERE TagID = ?]]
+    local err = us.sexec(db, sql, tag.title, tid)
+    if err ~= sqlite3.OK then return ngx.HTTP_METHOD_NOT_IMPLEMENTED end
 
     return ngx.HTTP_OK
 end
 
 local function handleDELETE(db)
-    local nid = tonumber(ngx.req.get_uri_args().noteID)
-    if not nid then return ngx.HTTP_BAD_REQUEST end
+    local tid = tonumber(ngx.req.get_uri_args().tagID)
+    if not tid then return ngx.HTTP_BAD_REQUEST end
 
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
     local sql = [[
-        SELECT NoteID
-            FROM Notes
-            WHERE NoteID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, nid, uid)
+        SELECT TagID
+            FROM Tags
+            WHERE TagID = ? AND UserID = ?]]
+    local rows = us.srows(db, sql, tid, uid)
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     if not rows() then return ngx.HTTP_UNAUTHORIZED end
 
     local sql = [[
-        DELETE FROM Notes
-            WHERE NoteID = ? AND UserID = ?]]
-    local err = us.sexec(db, sql, nid, uid)
+        DELETE FROM Tags
+            WHERE TagID = ? AND UserID = ?]]
+    local err = us.sexec(db, sql, tid, uid)
     if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     return ngx.HTTP_OK

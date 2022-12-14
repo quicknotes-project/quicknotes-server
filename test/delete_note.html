@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes</title>
+</head>
+
+<body>
+  <h1>Delete Note</h1>
+  <form id="form">
+    <legend>Note ID</legend>
+    <input type="text" name="noteID" id="noteID">
+    <br><br>
+    <input type="submit" value="go">
+  </form>
+
+  <span id="response"></span>
+
+  <script>
+    const apiRoute = "/api/note?noteID="
+    const form = document.getElementById("form")
+    const noteID = document.getElementById("noteID")
+    const response = document.getElementById("response")
+
+    state = {
+      noteID: "",
+    }
+    
+    noteID.addEventListener("change", (e) => {
+      state.noteID = e.target.value
+    })
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault()
+      fetch(apiRoute.concat(state.noteID), {
+        method: "DELETE"
+      }).then(res => {
+        if (res.status != 200) {
+          response.innerText = res.statusText + " (" + res.status + ")"
+          return
+        }
+        res.text().then(
+          text => response.innerText = "Success\n".concat(text)
+        )
+      })
+    })
+  </script>
+</body>
+
+</html>

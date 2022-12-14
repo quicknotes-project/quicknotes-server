@@ -22,8 +22,8 @@ CREATE TABLE Notes (
 
 CREATE TABLE Tags (
 	TagID integer PRIMARY KEY AUTOINCREMENT,
-	Title varchar,
-	Color varchar
+	UserID integer,
+	Title varchar
 );
 
 CREATE TABLE NoteTag (
