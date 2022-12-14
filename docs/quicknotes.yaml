@@ -5,6 +5,7 @@ info:
 servers:
   - url: https://quicknotes-project.github.io
     description: redirect to ngrok tunnel (listens on /api!)
+
 tags:
   - name: user
     description: Authentication & user data
@@ -12,6 +13,7 @@ tags:
     description: Operations with authenticated user's notes
   - name: tag
     description: Operations with authenticated user's tags
+
 paths:
   /register:
     post:
@@ -34,6 +36,7 @@ paths:
           description: Username conflict.
         "500":
           description: Internal server error.
+
   /login:
     post:
       security: []
@@ -61,6 +64,7 @@ paths:
           description: Invalid credentials provided in body.
         "500":
           description: Internal server error.
+
   /logout:
     post:
       summary: Log out
@@ -96,6 +100,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
     put:
       summary: Update user data and/or credentials
       requestBody:
@@ -113,6 +118,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
   /notes:
     get:
       tags:
@@ -131,6 +137,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
   /note:
     get:
       tags:
@@ -154,6 +161,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
     post:
       tags:
         - note
@@ -172,6 +180,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
     put:
       tags:
         - note
@@ -188,7 +197,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NoteMeta"
+              allOf:
+                - $ref: "#/components/schemas/NoteMeta"
+                - $ref: "#/components/schemas/NoteContent"
       responses:
         "200":
           description: Successful operation.
@@ -198,6 +209,7 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
     delete:
       tags:
         - note
@@ -218,37 +230,92 @@ paths:
           description: Client not authorized.
         "500":
           description: Internal server error.
+
   /tag:
-    get:
-      tags:
-        - tag
-      responses:
-        "200":
-          description: Successful operation
     post:
       tags:
         - tag
+      summary: Bind a tag to a note
+      description: Pass a tag's name to bind to a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                noteID:
+                  type: integer
+                  example: 213
+                title:
+                  type: string
+                  example: "programming"
       responses:
         "200":
-          description: Successful operation
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid noteID supplied.
+        "500":
+          description: Internal server error.
+
     put:
       tags:
         - tag
+      summary: Edit tag's name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tagID:
+                  type: number
+                  example: 123
+                title:
+                  type: string
+                  example: "computer science"
       responses:
         "200":
-          description: Successful operation
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid tagID supplied.
+        "500":
+          description: Internal server error.
+
     delete:
       tags:
         - tag
+      summary: Remove a tag
+      parameters:
+        - in: query
+          name: tagID
+          schema:
+            type: integer
+          required: true
+          description: Note's ID
+          example: 123
       responses:
         "200":
-          description: Successful operation
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid tagID supplied.
+        "500":
+          description: Internal server error.
+
 components:
   securitySchemes:
     cookieAuth:
       type: apiKey
       in: cookie
       name: session_id
+
   schemas:
     UserBase:
       type: object
@@ -256,6 +323,7 @@ components:
         username:
           type: string
           example: john_doe
+
     UserNames:
       allOf:
         - $ref: "#/components/schemas/UserBase"
@@ -264,6 +332,7 @@ components:
             fullname:
               type: string
               example: John Doe
+
     UserCredentials:
       allOf:
         - $ref: "#/components/schemas/UserBase"
@@ -273,10 +342,20 @@ components:
               type: string
               format: password
               example: qwerty123
+
     User:
       allOf:
         - $ref: "#/components/schemas/UserCredentials"
         - $ref: "#/components/schemas/UserNames"
+
+    TaggedEntity:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+
     NoteMeta:
       type: object
       properties:
@@ -297,20 +376,20 @@ components:
         title:
           type: string
           example: "'wa' and 'ga' suffixes usage"
-        tags:
-          type: array
-          items:
-            $ref: "#/components/schemas/Tag"
+
     NoteContent:
       type: object
       properties:
         content:
           type: string
           example: "God only knows"
+
     Note:
       allOf:
         - $ref: "#/components/schemas/NoteMeta"
+        - $ref: "#/components/schemas/TaggedEntity"
         - $ref: "#/components/schemas/NoteContent"
+
     Tag:
       type: object
       properties:
@@ -320,6 +399,7 @@ components:
         title:
           type: string
           example: japanese
+
   examples:
     NewNote:
       summary: A newly created note
@@ -330,5 +410,6 @@ components:
         modifiedAt: 2022-12-01 10:24:48
         tags: []
         content: ""
+
 security:
   - cookieAuth: []
