@@ -47,8 +47,8 @@ jobs:
 
       - name: Change relative paths to absolute
         run: |
-          sed -i 's/require ".\//require "\/home\/pi\/quicknotes-server\//g' ./scripts/*.lua
-          sed -i 's/open(".\//open("\/home\/pi\/quicknotes-server\//g' ./scripts/*.lua
+          sed -i 's/require ".\//require "\/usr\/local\/openresty\/nginx\//g' ./scripts/*.lua
+          sed -i 's/open(".\//open("\/usr\/local\/openresty\/nginx\//g' ./scripts/*.lua
 
       - name: Deploy
         env:
@@ -57,8 +57,8 @@ jobs:
           remote_user: pi
           remote_host: ${{ env.host }}
           remote_port: ${{ env.port }}
-          remote_path: ~/quicknotes-server/
+          remote_path: /usr/local/openresty/nginx/
         run: |
           rsh="ssh -o StrictHostKeyChecking=no -p $remote_port"
           rsync $switches -e "$rsh" $path $remote_user@$remote_host:$remote_path
-          ssh $remote_user@$remote_host -o StrictHostKeyChecking=no -p $remote_port "sudo systemctl restart quicknotes.service"
+          ssh $remote_user@$remote_host -o StrictHostKeyChecking=no -p $remote_port "sudo systemctl restart openresty.service"
