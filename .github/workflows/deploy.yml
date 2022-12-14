@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy
         env:
-          switches: -avz --delete
+          switches: -avz
           path: "*"
           remote_user: pi
           remote_host: ${{ env.host }}
