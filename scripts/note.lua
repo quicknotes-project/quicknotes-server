@@ -64,6 +64,22 @@ local function handleGET(db)
         content    = row[5]
     }
 
+    local sql = [[
+        SELECT t.TagID, t.Title
+            FROM Tags as t
+            JOIN NoteTag as nt ON nt.TagID = t.TagID
+            WHERE nt.NoteID = ? AND t.UserID = ?]]
+    local rows = us.srows(db, sql, nid, uid)
+    if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+
+    note.tags = {}
+    for row in rows do
+        note.tags[#note.tags+1] = {
+            tagID = row[1],
+            title = row[2],
+        }
+    end
+
     ngx.say(cjson.encode(note))
     return ngx.HTTP_OK
 end
