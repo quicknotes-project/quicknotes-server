@@ -1,4 +1,6 @@
 local cjson = require "cjson"
+cjson.encode_empty_table_as_object(false)
+
 local sqlite3 = require "lsqlite3complete"
 
 local us = require "./scripts/useful_stuff"
