@@ -143,6 +143,12 @@ local function handleDELETE(db)
     if not rows() then return ngx.HTTP_UNAUTHORIZED end
 
     local sql = [[
+        DELETE FROM NoteTag
+            WHERE NoteID = ?]]
+    local err = us.sexec(db, sql, nid)
+    if err ~= sqlite3.OK then return ngx.HTTP_INTERNAL_SERVER_ERROR end
+
+    local sql = [[
         DELETE FROM Notes
             WHERE NoteID = ? AND UserID = ?]]
     local err = us.sexec(db, sql, nid, uid)
