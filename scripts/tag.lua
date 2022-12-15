@@ -36,32 +36,6 @@ local function handlePOST(db)
     return ngx.HTTP_OK
 end
 
-local function handleGET(db)
-    local tid = tonumber(ngx.req.get_uri_args().tagID)
-    if not tid then return ngx.HTTP_BAD_REQUEST end
-
-    local uid = us.getUserId(ngx.req.get_headers(), db)
-    if not uid then return ngx.HTTP_UNAUTHORIZED end
-
-    local sql = [[
-        SELECT TagID, Title
-            FROM Tags
-            WHERE TagID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, tid, uid)
-    if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
-
-    local row = rows()
-    if not row then return ngx.HTTP_UNAUTHORIZED end
-
-    local tag = {
-        tagID = row[1],
-        title = row[2],
-    }
-
-    ngx.say(cjson.encode(tag))
-    return ngx.HTTP_OK
-end
-
 local function handlePUT(db)
     local tid = tonumber(ngx.req.get_uri_args().tagID)
     if not tid then return ngx.HTTP_BAD_REQUEST end
@@ -130,7 +104,6 @@ end
 local handlers = {
     DELETE = handleDELETE,
     POST = handlePOST,
-    GET = handleGET,
     PUT = handlePUT
 }
 
