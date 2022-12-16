@@ -33,7 +33,8 @@ local function handlePOST(db)
         title      = row[2],
         createdAt  = row[3],
         modifiedAt = row[4],
-        content    = row[5]
+        content    = row[5],
+        tags       = {}
     }
 
     ngx.say(cjson.encode(note))
