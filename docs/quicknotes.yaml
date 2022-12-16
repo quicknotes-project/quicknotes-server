@@ -308,6 +308,38 @@ paths:
           description: Invalid tagID supplied.
         "500":
           description: Internal server error.
+  /find:
+    get:
+      tags:
+        - search
+      summary: Perform search by note's title and/or tags
+      parameters:
+        - in: query
+          name: content
+          schema:
+            type: string
+          required: false
+          description: string to search for in notes' titles
+        - in: query
+          name: tags
+          schema:
+            type: string
+          required: false
+          description: list of tags
+          example: "grammar,japanese"
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NoteMeta"
+        "401":
+          description: Client not authorized.
+        "500":
+          description: Internal server error.
 
 components:
   securitySchemes:
