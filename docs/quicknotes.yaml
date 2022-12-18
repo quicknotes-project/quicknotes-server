@@ -231,35 +231,26 @@ paths:
         "500":
           description: Internal server error.
 
-  /tag:
-    post:
+  /tags:
+    get:
       tags:
         - tag
-      summary: Bind a tag to a note
-      description: Pass a tag's name to bind to a note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                noteID:
-                  type: integer
-                  example: 213
-                title:
-                  type: string
-                  example: "programming"
+      summary: Get all user's tags
       responses:
         "200":
           description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
         "401":
           description: Client not authorized.
-        "403":
-          description: Invalid noteID supplied.
         "500":
           description: Internal server error.
 
+  /tag:
     put:
       tags:
         - tag
@@ -308,6 +299,93 @@ paths:
           description: Invalid tagID supplied.
         "500":
           description: Internal server error.
+
+  /notetag:
+    post:
+      tags:
+        - notetag
+      summary: Bind a tag to a note
+      description: Pass a tag's name to bind to a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                noteID:
+                  type: integer
+                  example: 213
+                title:
+                  type: string
+                  example: "programming"
+      responses:
+        "200":
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid noteID supplied.
+        "500":
+          description: Internal server error.
+
+    put:
+      tags:
+        - notetag
+      summary: Rename note's tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                noteID:
+                  type: integer
+                  example: 213
+                tagID:
+                  type: number
+                  example: 123
+                title:
+                  type: string
+                  example: "computer science"
+      responses:
+        "200":
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid noteID or tagID supplied.
+        "500":
+          description: Internal server error.
+
+    delete:
+      tags:
+        - notetag
+      summary: Remove a tag from a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                noteID:
+                  type: integer
+                  example: 213
+                tagID:
+                  type: number
+                  example: 123
+      responses:
+        "200":
+          description: Successful operation.
+        "401":
+          description: Client not authorized.
+        "403":
+          description: Invalid noteID or tagID supplied.
+        "500":
+          description: Internal server error.
+
   /find:
     get:
       tags:
