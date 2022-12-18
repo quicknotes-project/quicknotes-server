@@ -1,5 +1,18 @@
 local M = {}
 
+function M.split(str, sep)
+    -- horrible algorithm, should be rewritten
+    if not sep then sep = " " end
+    local res = {}
+    str = str:gsub(sep, sep .. sep)
+    for s in string.gmatch(sep .. str .. sep, sep .. "(.-)" .. sep) do
+        if #s > 0 then
+            res[#res+1] = s
+        end
+    end
+    return res
+end
+
 function M.getSessionId(headers)
     local cookies = headers["Cookie"]
     if not cookies then return nil end
