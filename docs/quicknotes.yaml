@@ -13,6 +13,8 @@ tags:
     description: Operations with authenticated user's notes
   - name: tag
     description: Operations with authenticated user's tags
+  - name: search
+    description: Search through authenticated user's notes
 
 paths:
   /register:
@@ -260,14 +262,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                tagID:
-                  type: number
-                  example: 123
-                title:
-                  type: string
-                  example: "computer science"
+              $ref: "#/components/schemas/Tag"
       responses:
         "200":
           description: Successful operation.
@@ -288,7 +283,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: Note's ID
+          description: Tag's ID
           example: 123
       responses:
         "200":
@@ -303,7 +298,7 @@ paths:
   /notetag:
     post:
       tags:
-        - notetag
+        - tag
       summary: Bind a tag to a note
       description: Pass a tag's name to bind to a note
       requestBody:
@@ -331,7 +326,7 @@ paths:
 
     put:
       tags:
-        - notetag
+        - tag
       summary: Rename note's tag
       requestBody:
         required: true
@@ -361,7 +356,7 @@ paths:
 
     delete:
       tags:
-        - notetag
+        - tag
       summary: Remove a tag from a note
       requestBody:
         required: true
@@ -393,11 +388,12 @@ paths:
       summary: Perform search by note's title and/or tags
       parameters:
         - in: query
-          name: content
+          name: title
           schema:
             type: string
           required: false
           description: string to search for in notes' titles
+          example: suffix
         - in: query
           name: tags
           schema:
