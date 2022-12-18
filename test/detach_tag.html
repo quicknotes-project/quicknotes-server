@@ -9,12 +9,12 @@
 </head>
 
 <body>
-  <h1>Attach Tag</h1>
+  <h1>Detach Tag</h1>
   <form id="form">
     <legend>Note ID</legend>
     <input type="text" name="noteID" id="noteID">
-    <legend>Tag Title</legend>
-    <input type="text" name="title" id="title">
+    <legend>Tag ID</legend>
+    <input type="text" name="tagID" id="tagID">
     <br><br>
     <input type="submit" value="go">
   </form>
@@ -24,26 +24,26 @@
     const apiRoute = "/api/notetag"
     const form = document.getElementById("form")
     const noteID = document.getElementById("noteID")
-    const title = document.getElementById("title")
+    const tagID = document.getElementById("tagID")
     const response = document.getElementById("response")
 
     state = {
       noteID: "",
-      title: ""
+      tagID: "",
     }
     
     noteID.addEventListener("change", (e) => {
       state.noteID = e.target.value
     })
-    title.addEventListener("change", (e) => {
-      state.title = e.target.value
+    tagID.addEventListener("change", (e) => {
+      state.tagID = e.target.value
     })
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault()
       const body = JSON.stringify(state)
       const res = await fetch(apiRoute, {
-        method: "POST",
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json"
         },
