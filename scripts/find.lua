@@ -6,17 +6,58 @@ local sqlite3 = require "lsqlite3complete"
 local us = require "./scripts/useful_stuff"
 
 local function handleGET(db)
-    local query = ngx.req.get_uri_args()["content"]
-    if not query then return ngx.HTTP_BAD_REQUEST end
+    local title = ngx.req.get_uri_args().title
+    local tags  = ngx.req.get_uri_args().tags
+    if (not title or #title == 0) and
+       (not tags  or #tags == 0)
+    then
+        return ngx.HTTP_BAD_REQUEST
+    end
 
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
-    local sql = [[
-        SELECT NoteID, Title, CreatedAt, ModifiedAt
-            FROM Notes
-            WHERE UserID = ? AND Title LIKE ?]]
-    local rows = us.srows(db, sql, uid, "%" .. query .. "%")
+    local tags = us.split(tags, ",")
+    local rows = nil
+    if not tags or #tags == 0 then -- only title
+        local sql = [[
+            SELECT NoteID, Title, CreatedAt, ModifiedAt
+                FROM Notes
+                WHERE UserID = ? AND Title LIKE ?]]
+        rows = us.srows(db, sql, uid, "%" .. title .. "%")
+    elseif not title or #title == 0 then -- only tags
+        local subsql = [[
+            SELECT DISTINCT nt.NoteID FROM NoteTag AS nt
+                JOIN Tags AS t ON t.TagID = nt.TagID
+                WHERE t.Title = ?]]
+
+        local subsqlTable = {}
+        for _ = 1,#tags do subsqlTable[#subsqlTable+1] = subsql end
+
+        local sql = string.format([[
+            SELECT NoteID, Title, CreatedAt, ModifiedAt
+                FROM Notes
+                WHERE UserID = ? AND NoteID IN (%s)]],
+            table.concat(subsqlTable, " INTERSECT ")
+        )
+        rows = us.srows(db, sql, uid, unpack(tags))
+    else -- title and tags
+        local subsql = [[
+            SELECT DISTINCT nt.NoteID FROM NoteTag AS nt
+                JOIN Tags AS t ON t.TagID = nt.TagID
+                WHERE t.Title = ?]]
+
+        local subsqlTable = {}
+        for _ = 1,#tags do subsqlTable[#subsqlTable+1] = subsql end
+
+        local sql = string.format([[
+            SELECT NoteID, Title, CreatedAt, ModifiedAt
+                FROM Notes
+                WHERE UserID = ? AND Title LIKE ? AND NoteID IN (%s)]],
+            table.concat(subsqlTable, " INTERSECT ")
+        )
+        rows = us.srows(db, sql, uid, "%" .. title .. "%", unpack(tags))
+    end
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local notes = {}

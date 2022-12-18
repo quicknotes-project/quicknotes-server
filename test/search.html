@@ -9,10 +9,12 @@
 </head>
 
 <body>
-  <h1>Search By Title</h1>
+  <h1>Search</h1>
   <form id="form">
     <legend>Note Title</legend>
     <input type="text" name="title" id="title">
+    <legend>Tags</legend>
+    <input type="text" name="tags" id="tags">
     <br><br>
     <input type="submit" value="go">
   </form>
@@ -20,24 +22,32 @@
   <span id="response"></span>
 
   <script>
-    const apiRoute = "/api/find?content="
+    const apiRoute = "/api/find?title="
     const form = document.getElementById("form")
     const title = document.getElementById("title")
+    const tags = document.getElementById("tags")
     const response = document.getElementById("response")
 
     state = {
-      title: ""
+      title: "",
+      tags: ""
     }
     
     title.addEventListener("change", (e) => {
       state.title = e.target.value
     })
+    tags.addEventListener("change", (e) => {
+      state.tags = e.target.value
+    })
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault()
-      const res = await fetch(apiRoute.concat(state.title), {
-        method: "GET"
-      })
+      const res = await fetch(
+        apiRoute.concat(state.title)
+                .concat("&tags=")
+                .concat(state.tags),
+        { method: "GET" }
+      )
       if (res.status != 200) {
         response.innerText = res.statusText + " (" + res.status + ")"
         return
