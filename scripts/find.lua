@@ -8,6 +8,10 @@ local us = require "./scripts/useful_stuff"
 local function handleGET(db)
     local title = ngx.req.get_uri_args().title
     local tags  = ngx.req.get_uri_args().tags
+
+    title = title and title:match("^%s*(.-)%s*$")
+    tags = tags and tags:match("^%s*(.-)%s*$")
+
     if (not title or #title == 0) and
        (not tags  or #tags == 0)
     then
