@@ -22,7 +22,7 @@
   <span id="response"></span>
 
   <script>
-    const apiRoute = "/api/tag?tagID="
+    const apiRoute = "/api/tag"
     const form = document.getElementById("form")
     const tagID = document.getElementById("tagID")
     const title = document.getElementById("title")
@@ -43,7 +43,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault()
       const body = JSON.stringify(state)
-      const res = await fetch(apiRoute.concat(state.tagID), {
+      const res = await fetch(apiRoute, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"

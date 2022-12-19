@@ -5,9 +5,6 @@ local us = require "./scripts/useful_stuff"
 
 
 local function handlePUT(db)
-    local tid = tonumber(ngx.req.get_uri_args().tagID)
-    if not tid then return ngx.HTTP_BAD_REQUEST end
-
     local uid = us.getUserId(ngx.req.get_headers(), db)
     if not uid then return ngx.HTTP_UNAUTHORIZED end
 
@@ -16,13 +13,19 @@ local function handlePUT(db)
     if not dataJSON then return ngx.HTTP_BAD_REQUEST end
 
     local dataTable = cjson.decode(dataJSON)
-    if not dataTable then return ngx.HTTP_BAD_REQUEST end
+
+    if not dataTable or
+       not dataTable.tagID or
+       not dataTable.title
+    then
+        return ngx.HTTP_BAD_REQUEST
+    end
 
     local sql = [[
         SELECT Title
             FROM Tags
             WHERE TagID = ? AND UserID = ?]]
-    local rows = us.srows(db, sql, tid, uid)
+    local rows = us.srows(db, sql, dataTable.tagID, uid)
     if not rows then return ngx.HTTP_INTERNAL_SERVER_ERROR end
 
     local row = rows()
@@ -38,7 +41,7 @@ local function handlePUT(db)
         UPDATE Tags
             SET Title = ?
             WHERE TagID = ?]]
-    local err = us.sexec(db, sql, tag.title, tid)
+    local err = us.sexec(db, sql, tag.title, dataTable.tagID)
     if err ~= sqlite3.OK then return ngx.HTTP_METHOD_NOT_IMPLEMENTED end
 
     return ngx.HTTP_OK
